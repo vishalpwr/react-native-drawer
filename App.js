@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native'
 import React from 'react'
-import { View, Text, Linking, StyleSheet, useWindowDimensions, Image, TouchableOpacity } from 'react-native'
+import { View, Text, Linking, StyleSheet, useWindowDimensions, Image, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native'
 import Home from './src/screens/Home'
 import {
   createDrawerNavigator,
@@ -21,14 +21,14 @@ import Styles from './src/common/Styles';
 
 const Drawer = createDrawerNavigator();
 
-const UserView = ({ navigation }) => {
+const UserView = ({ navigation, opacity }) => {
   return (
     <TouchableRipple
       onPress={() => {
         navigation.navigate('Profile')
       }}
     >
-      <View style={styles.drawerHeader}>
+      <Animated.View style={[styles.drawerHeader, { opacity }]}>
         <Image style={styles.profileImage} source={require('./src/assets/images/user_boy.png')} />
         <View style={styles.textContainer}>
           <Title style={styles.title}>Vishal Pawar</Title>
@@ -41,7 +41,7 @@ const UserView = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </Animated.View>
     </TouchableRipple>
   )
 }
@@ -53,7 +53,7 @@ const CustomDrawer = (props) => {
   });
   const opacity = Animated.interpolateNode(props.progress, {
     inputRange: [0, 0.5, 1],
-    outputRange: [0, 0.9, 1]
+    outputRange: [0, 0.1, 1]
   })
   return (
     <RadialGradient style={Styles.container}
@@ -61,15 +61,16 @@ const CustomDrawer = (props) => {
       // stops={[0.1, 0.5, 0.75, 1]}
       center={[145, 100]}
       radius={650}>
+      <BlurView
+        style={styles.blurAbsolute}
+        blurType="light"
+        blurAmount={20}
+        overlayColor="transparent"
+        reducedTransparencyFallbackColor="white"//ios only
+      />
       <Animated.View style={{ flex: 1, transform: [{ translateX }], backgroundColor: 'transparent' }}>
-        <BlurView
-          style={styles.blurAbsolute}
-          blurType="light"
-          blurAmount={20}
-          reducedTransparencyFallbackColor="white"//ios only
-        />
         <DrawerContentScrollView {...props}>
-          <UserView {...props} />
+          <UserView {...props} opacity={opacity} />
           <DrawerItemList {...props}
             activeTintColor={Colors.accent}
           />
@@ -127,9 +128,12 @@ function MyDrawer() {
 }
 const App = () => {
   return (
-    <NavigationContainer>
-      <MyDrawer />
-    </NavigationContainer>
+    <SafeAreaView style={Styles.container}>
+      <StatusBar backgroundColor={Colors.green} barStyle={Colors.white} />
+      <NavigationContainer>
+        <MyDrawer />
+      </NavigationContainer>
+    </SafeAreaView>
   )
 }
 
